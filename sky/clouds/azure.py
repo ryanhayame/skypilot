@@ -1,5 +1,4 @@
 """Azure."""
-import base64
 import functools
 import json
 import os
@@ -67,7 +66,7 @@ class Azure(clouds.Cloud):
 
     _INDENT_PREFIX = ' ' * 4
 
-    PROVISIONER_VERSION = clouds.ProvisionerVersion.RAY_PROVISIONER_SKYPILOT_TERMINATOR
+    PROVISIONER_VERSION = clouds.ProvisionerVersion.SKYPILOT
     STATUS_VERSION = clouds.StatusVersion.SKYPILOT
 
     @classmethod
@@ -269,12 +268,13 @@ class Azure(clouds.Cloud):
     def get_zone_shell_cmd(cls) -> Optional[str]:
         return None
 
-    def make_deploy_resources_variables(self,
-                                        resources: 'resources.Resources',
-                                        cluster_name_on_cloud: str,
-                                        region: 'clouds.Region',
-                                        zones: Optional[List['clouds.Zone']],
-                                        dryrun: bool = False) -> Dict[str, Any]:
+    def make_deploy_resources_variables(
+            self,
+            resources: 'resources.Resources',
+            cluster_name: resources_utils.ClusterName,
+            region: 'clouds.Region',
+            zones: Optional[List['clouds.Zone']],
+            dryrun: bool = False) -> Dict[str, Any]:
         assert zones is None, ('Azure does not support zones', zones)
 
         region_name = region.name
@@ -324,8 +324,7 @@ class Azure(clouds.Cloud):
         # restarted, identified by a file /tmp/__restarted is existing.
         # Also, add default user to docker group.
         # pylint: disable=line-too-long
-        cloud_init_setup_commands = base64.b64encode(
-            textwrap.dedent("""\
+        cloud_init_setup_commands = textwrap.dedent("""\
             #cloud-config
             runcmd:
               - sed -i 's/#Banner none/Banner none/' /etc/ssh/sshd_config
@@ -341,7 +340,7 @@ class Azure(clouds.Cloud):
               - path: /etc/apt/apt.conf.d/10cloudinit-disable
                 content: |
                   APT::Periodic::Enable "0";
-            """).encode('utf-8')).decode('utf-8')
+            """).split('\n')
 
         def _failover_disk_tier() -> Optional[resources_utils.DiskTier]:
             if (r.disk_tier is not None and
@@ -374,7 +373,7 @@ class Azure(clouds.Cloud):
             'disk_tier': Azure._get_disk_type(_failover_disk_tier()),
             'cloud_init_setup_commands': cloud_init_setup_commands,
             'azure_subscription_id': self.get_project_id(dryrun),
-            'resource_group': f'{cluster_name_on_cloud}-{region_name}',
+            'resource_group': f'{cluster_name.name_on_cloud}-{region_name}',
         }
 
     def _get_feasible_launchable_resources(

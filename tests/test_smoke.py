@@ -797,6 +797,28 @@ def test_gcp_mig():
     run_one_test(test)
 
 
+@pytest.mark.gcp
+def test_gcp_force_enable_external_ips():
+    name = _get_cluster_name()
+    test_commands = [
+        f'sky launch -y -c {name} --cloud gcp --cpus 2 tests/test_yamls/minimal.yaml',
+        # Check network of vm is "default"
+        (f'gcloud compute instances list --filter=name~"{name}" --format='
+         '"value(networkInterfaces.network)" | grep "networks/default"'),
+        # Check External NAT in network access configs, corresponds to external ip
+        (f'gcloud compute instances list --filter=name~"{name}" --format='
+         '"value(networkInterfaces.accessConfigs[0].name)" | grep "External NAT"'
+        ),
+        f'sky down -y {name}',
+    ]
+    skypilot_config = 'tests/test_yamls/force_enable_external_ips_config.yaml'
+    test = Test('gcp_force_enable_external_ips',
+                test_commands,
+                f'sky down -y {name}',
+                env={'SKYPILOT_CONFIG': skypilot_config})
+    run_one_test(test)
+
+
 @pytest.mark.aws
 def test_image_no_conda():
     name = _get_cluster_name()
@@ -1979,6 +2001,85 @@ def test_kueue_labels_kubernetes():
         f'sky down -y {name}; kubectl delete --ignore-not-found -f tests/kubernetes/kueue-single-clusterqueue.yaml; kubectl delete --ignore-not-found -f tests/kubernetes/kueue-manifest.yaml',
     )
     run_one_test(test)
+# ---------- Container logs from task on Kubernetes ----------
+@pytest.mark.kubernetes
+def test_container_logs_multinode_kubernetes():
+    name = _get_cluster_name()
+    task_yaml = 'tests/test_yamls/test_k8s_logs.yaml'
+    with tempfile.NamedTemporaryFile(suffix='.yaml', mode='w') as f:
+        test = Test(
+            'container_logs_multinode_kubernetes',
+            [
+                f'sky launch -y -c {name} {task_yaml} --num-nodes 2',
+                'kubectl get pods -o jsonpath="{.items[*].metadata.name}" | tr " " "\n" | grep worker'
+                '| xargs -I {} kubectl logs {} | wc -l | grep 9',
+                'kubectl get pods -o jsonpath="{.items[*].metadata.name}" | tr " " "\n" | grep head'
+                '| xargs -I {} kubectl logs {} | wc -l | grep 9',
+            ],
+            f'sky down -y {name}',
+        )
+        run_one_test(test)
+
+
+@pytest.mark.kubernetes
+def test_container_logs_two_jobs_kubernetes():
+    name = _get_cluster_name()
+    task_yaml = 'tests/test_yamls/test_k8s_logs.yaml'
+    pod_logs = (
+        'kubectl get pods -o jsonpath="{.items[*].metadata.name}"| grep head | xargs -I {} kubectl logs {}'
+    )
+    with tempfile.NamedTemporaryFile(suffix='.yaml', mode='w') as f:
+        test = Test(
+            'test_container_logs_two_jobs_kubernetes',
+            [
+                f'sky launch -y -c {name} {task_yaml}',
+                f'{pod_logs} | wc -l | grep 9',
+                f'sky launch -y -c {name} {task_yaml}',
+                f'{pod_logs} | wc -l | grep 18',
+                f'{pod_logs} | grep 1 | wc -l | grep 2',
+                f'{pod_logs} | grep 2 | wc -l | grep 2',
+                f'{pod_logs} | grep 3 | wc -l | grep 2',
+                f'{pod_logs} | grep 4 | wc -l | grep 2',
+                f'{pod_logs} | grep 5 | wc -l | grep 2',
+                f'{pod_logs} | grep 6 | wc -l | grep 2',
+                f'{pod_logs} | grep 7 | wc -l | grep 2',
+                f'{pod_logs} | grep 8 | wc -l | grep 2',
+                f'{pod_logs} | grep 9 | wc -l | grep 2',
+            ],
+            f'sky down -y {name}',
+        )
+        run_one_test(test)
+
+
+@pytest.mark.kubernetes
+def test_container_logs_two_simultaneous_jobs_kubernetes():
+    name = _get_cluster_name()
+    task_yaml = 'tests/test_yamls/test_k8s_logs.yaml'
+    pod_logs = (
+        'kubectl get pods -o jsonpath="{.items[*].metadata.name}"| grep head | xargs -I {} kubectl logs {}'
+    )
+    with tempfile.NamedTemporaryFile(suffix='.yaml', mode='w') as f:
+        test = Test(
+            'test_container_logs_two_simultaneous_jobs_kubernetes',
+            [
+                f'sky launch -y -c {name}',
+                f'sky exec -c {name} -d {task_yaml}',
+                f'sky exec -c {name} -d {task_yaml}',
+                'sleep 5',
+                f'{pod_logs} | wc -l | grep 18',
+                f'{pod_logs} | grep 1 | wc -l | grep 2',
+                f'{pod_logs} | grep 2 | wc -l | grep 2',
+                f'{pod_logs} | grep 3 | wc -l | grep 2',
+                f'{pod_logs} | grep 4 | wc -l | grep 2',
+                f'{pod_logs} | grep 5 | wc -l | grep 2',
+                f'{pod_logs} | grep 6 | wc -l | grep 2',
+                f'{pod_logs} | grep 7 | wc -l | grep 2',
+                f'{pod_logs} | grep 8 | wc -l | grep 2',
+                f'{pod_logs} | grep 9 | wc -l | grep 2',
+            ],
+            f'sky down -y {name}',
+        )
+        run_one_test(test)
 
 
 # ---------- Task: n=2 nodes with setups. ----------
@@ -3077,7 +3178,6 @@ def test_kubernetes_custom_image(image_id):
     run_one_test(test)
 
 
-@pytest.mark.slow
 def test_azure_start_stop_two_nodes():
     name = _get_cluster_name()
     test = Test(
@@ -3347,7 +3447,7 @@ def _check_replica_in_status(name: str, check_tuples: List[Tuple[int, bool,
     """Check replicas' status and count in sky serve status
 
     We will check vCPU=2, as all our tests use vCPU=2.
-    
+
     Args:
         name: the name of the service
         check_tuples: A list of replica property to check. Each tuple is
@@ -3864,8 +3964,15 @@ def test_skyserve_new_autoscaler_update(mode: str, generic_cloud: str):
     """Test skyserve with update that changes autoscaler"""
     name = _get_service_name() + mode
 
+    wait_until_no_pending = (
+        f's=$(sky serve status {name}); echo "$s"; '
+        'until ! echo "$s" | grep PENDING; do '
+        '  echo "Waiting for replica to be out of pending..."; '
+        f' sleep 5; s=$(sky serve status {name}); '
+        '  echo "$s"; '
+        'done')
     four_spot_up_cmd = _check_replica_in_status(name, [(4, True, 'READY')])
-    update_check = [f'until ({four_spot_up_cmd}); do sleep 5; done; sleep 10;']
+    update_check = [f'until ({four_spot_up_cmd}); do sleep 5; done; sleep 15;']
     if mode == 'rolling':
         # Check rolling update, it will terminate one of the old on-demand
         # instances, once there are 4 spot instance ready.
@@ -3894,7 +4001,8 @@ def test_skyserve_new_autoscaler_update(mode: str, generic_cloud: str):
             's=$(curl http://$endpoint); echo "$s"; echo "$s" | grep "Hi, SkyPilot here"',
             f'sky serve update {name} --cloud {generic_cloud} --mode {mode} -y tests/skyserve/update/new_autoscaler_after.yaml',
             # Wait for update to be registered
-            f'sleep 120',
+            f'sleep 90',
+            wait_until_no_pending,
             _check_replica_in_status(
                 name, [(4, True, _SERVICE_LAUNCHING_STATUS_REGEX + '\|READY'),
                        (1, False, _SERVICE_LAUNCHING_STATUS_REGEX),
