@@ -109,7 +109,9 @@ def get_gke_accelerator_name(accelerator: str) -> str:
     if accelerator == 'H100':
         # H100 is named as H100-80GB in GKE.
         accelerator = 'H100-80GB'
-    if accelerator in ('A100-80GB', 'L4', 'H100-80GB'):
+    if accelerator == 'H100-80GB':
+        return 'nvidia-h100-mega-80gb'
+    elif accelerator in ('A100-80GB', 'L4'):
         # A100-80GB, L4 and H100-80GB have a different name pattern.
         return 'nvidia-{}'.format(accelerator.lower())
     else:
