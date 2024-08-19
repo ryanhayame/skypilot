@@ -40,6 +40,7 @@ __all__ = [
     'OCI',
     'Vsphere',
     'Kubernetes',
+    'TailScale',
     'CloudImplementationFeatures',
     'Region',
     'Zone',
