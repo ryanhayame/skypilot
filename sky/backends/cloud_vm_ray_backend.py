@@ -87,6 +87,7 @@ _NODES_LAUNCHING_PROGRESS_TIMEOUT = {
     clouds.OCI: 300,
     clouds.Paperspace: 600,
     clouds.Kubernetes: 300,
+    clouds.Tailscale: 600,
     clouds.Vsphere: 240,
 }
 
@@ -177,6 +178,7 @@ def _get_cluster_config_template(cloud):
         clouds.Paperspace: 'paperspace-ray.yml.j2',
         clouds.RunPod: 'runpod-ray.yml.j2',
         clouds.Kubernetes: 'kubernetes-ray.yml.j2',
+        clouds.TailScale: 'kubernetes-ray.yml.j2',
         clouds.Vsphere: 'vsphere-ray.yml.j2',
         clouds.Fluidstack: 'fluidstack-ray.yml.j2'
     }
@@ -1714,7 +1716,7 @@ class RetryingVmProvisioner(object):
         region_name = logging_info['region_name']
         zone_str = logging_info['zone_str']
         style = colorama.Style
-        if isinstance(to_provision_cloud, clouds.Kubernetes):
+        if isinstance(to_provision_cloud, (clouds.Kubernetes, clouds.TailScale)):
             logger.info(f'{style.BRIGHT}Launching on {to_provision_cloud} '
                         f'{style.RESET_ALL}')
         else:
@@ -1950,7 +1952,7 @@ class RetryingVmProvisioner(object):
                 requested_features = self._requested_features.copy()
                 # Skip stop feature for Kubernetes and RunPod controllers.
                 if (isinstance(to_provision.cloud,
-                               (clouds.Kubernetes, clouds.RunPod)) and
+                               (clouds.Kubernetes, clouds.RunPod, clouds.TailScale)) and
                         controller_utils.Controllers.from_name(cluster_name)
                         is not None):
                     assert (clouds.CloudImplementationFeatures.STOP
@@ -4105,7 +4107,7 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
         if idle_minutes_to_autostop is not None:
             # Skip auto-stop for Kubernetes and RunPod clusters.
             if (isinstance(handle.launched_resources.cloud,
-                           (clouds.Kubernetes, clouds.RunPod)) and not down and
+                           (clouds.Kubernetes, clouds.RunPod, clouds.TailScale)) and not down and
                     idle_minutes_to_autostop >= 0):
                 # We should hit this code path only for the controllers on
                 # Kubernetes and RunPod clusters.
