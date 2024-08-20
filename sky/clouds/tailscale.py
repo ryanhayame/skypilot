@@ -21,6 +21,7 @@ The approach with the TailScale Provisioner is that we:
       CPU VMs to keep the cluster up without breaking the bank.
 """
 
+import subprocess
 import typing
 from typing import Dict, List, Optional, Tuple
 
@@ -40,3 +41,26 @@ class TailScale(Kubernetes):
     """TailScale k8s Provisioner"""
 
     _REPR = 'TailScale'
+    _regions: List[clouds.Region] = []
+
+    @classmethod
+    def check_credentials(cls) -> Tuple[bool, Optional[str]]:
+      """Checks for access to tailnet and existence of k8s clusters.
+      Any detected clusters are added to the tailnet
+
+      Returns:
+        Tuple[bool, Optional[str]]: _description_
+      """
+      try:
+        subprocess.check_output(
+          "tailscale status --json",
+          shell=True
+        )
+      except subprocess.CalledProcessError as e:
+        return False, f"`tailscale status --json` failed. Check if tailscale CLI is installed: {str(e)}"
+      except Exception as e:
+         return False, str(e)
+
+      return True, None
+         
+      

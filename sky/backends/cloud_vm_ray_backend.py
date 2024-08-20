@@ -87,7 +87,7 @@ _NODES_LAUNCHING_PROGRESS_TIMEOUT = {
     clouds.OCI: 300,
     clouds.Paperspace: 600,
     clouds.Kubernetes: 300,
-    clouds.Tailscale: 600,
+    clouds.TailScale: 300,
     clouds.Vsphere: 240,
 }
 

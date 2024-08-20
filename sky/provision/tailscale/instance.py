@@ -18,7 +18,4 @@ from sky.utils import subprocess_utils
 from sky.utils import ux_utils
 
 logger = sky_logging.init_logger(__name__)
-TAG_RAY_CLUSTER_NAME = 'ray-cluster-name'
-TAG_SKYPILOT_CLUSTER_NAME = 'skypilot-cluster-name'
-TAG_POD_INITIALIZED = 'skypilot-initialized'
 
