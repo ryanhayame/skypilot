@@ -9,7 +9,7 @@ The approach with the TailScale Provisioner is that we:
     - Critically, the node launching clusters/jobs needs to be located within
       the tailnet. 
     - This allows us to list what clusters are available and most
-      importantly are up. 
+      importantly have an accessible tailscale proxy.
     - Executing commands on the given cluster is as simple
       as setting the kubeconfig to pointing the desired cluster within the
       tailnet. 
@@ -23,11 +23,13 @@ The approach with the TailScale Provisioner is that we:
 
 import subprocess
 import typing
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from sky import clouds
 from sky import sky_logging
 from sky.clouds.kubernetes import Kubernetes
+from sky.provision.kubernetes import utils as kubernetes_utils
+from sky.provision.tailscale import utils
 from sky.utils import resources_utils
 
 if typing.TYPE_CHECKING:
@@ -45,22 +47,17 @@ class TailScale(Kubernetes):
 
     @classmethod
     def check_credentials(cls) -> Tuple[bool, Optional[str]]:
-      """Checks for access to tailnet and existence of k8s clusters.
-      Any detected clusters are added to the tailnet
+        """Checks for access to tailnet and existence of k8s clusters.
+        Any detected clusters are added to the tailnet and included
+        as an available zone. Regions are just different providers.
+        """
+        available_clusters = utils.list_active_clusters()
 
-      Returns:
-        Tuple[bool, Optional[str]]: _description_
-      """
-      try:
-        subprocess.check_output(
-          "tailscale status --json",
-          shell=True
-        )
-      except subprocess.CalledProcessError as e:
-        return False, f"`tailscale status --json` failed. Check if tailscale CLI is installed: {str(e)}"
-      except Exception as e:
-         return False, str(e)
+        if len(available_clusters) == 0:
+            return False, ('Unable to connect to any tailscale clusters. Check that k8s clusters and this device'
+                'are active in tailnet and that proper RBAC is enabled for this user/device')
 
-      return True, None
+        logger.info(f'the following tailnets are enabled. {list(available_clusters.keys())}')
+        return True, None
          
       
