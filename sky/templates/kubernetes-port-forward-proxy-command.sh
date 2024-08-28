@@ -28,9 +28,9 @@ fi
 # see - https://github.com/kubernetes/kubernetes/issues/74551#issuecomment-769185879
 KUBECTL_OUTPUT=$(mktemp)
 if [ -n "$KUBE_CONTEXT" ]; then
-  kubectl --context="$KUBE_CONTEXT" port-forward pod/"${POD_NAME}" :22 > "${KUBECTL_OUTPUT}" 2>&1 &
+  kubectl --context="$KUBE_CONTEXT" port-forward pod/"${POD_NAME}" :12345 > "${KUBECTL_OUTPUT}" 2>&1 &
 else
-  kubectl port-forward pod/"${POD_NAME}" :22 > "${KUBECTL_OUTPUT}" 2>&1 &
+  kubectl port-forward pod/"${POD_NAME}" :12345 > "${KUBECTL_OUTPUT}" 2>&1 &
 fi
 
 # Capture the PID for the backgrounded kubectl command

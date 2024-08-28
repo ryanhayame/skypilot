@@ -431,6 +431,7 @@ def _setup_ssh_in_pods(namespace: str, new_nodes: List) -> None:
         '~/.ssh/authorized_keys; '
         '$(prefix_cmd) chmod 644 ~/.ssh/authorized_keys; '
         '$(prefix_cmd) service ssh restart; '
+        '$(prefix_cmd) /usr/sbin/sshd -p 12345;'
         # Eliminate the error
         # `mesg: ttyname failed: inappropriate ioctl for device`.
         # See https://www.educative.io/answers/error-mesg-ttyname-failed-inappropriate-ioctl-for-device  # pylint: disable=line-too-long
@@ -749,7 +750,7 @@ def get_cluster_info(
     network_mode = kubernetes_enums.KubernetesNetworkingMode.from_str(
         network_mode_str)
     external_ip = kubernetes_utils.get_external_ip(network_mode)
-    port = 22
+    port = 12345
     if not provider_config.get('use_internal_ips', False):
         port = kubernetes_utils.get_head_ssh_port(cluster_name_on_cloud,
                                                   namespace)
