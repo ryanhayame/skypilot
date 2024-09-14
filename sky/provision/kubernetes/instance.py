@@ -576,6 +576,7 @@ def _create_pods(region: str, cluster_name_on_cloud: str,
                     }
                 }]
             }
+        }
 
         pod = kubernetes.core_api(context).create_namespaced_pod(
             namespace, pod_spec)
