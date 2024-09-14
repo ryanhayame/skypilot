@@ -2143,6 +2143,8 @@ def test_kueue_labels_kubernetes():
         f'sky down -y {name}; kubectl delete --ignore-not-found -f tests/kubernetes/kueue-single-clusterqueue.yaml; kubectl delete --ignore-not-found -f tests/kubernetes/kueue-manifest.yaml',
     )
     run_one_test(test)
+
+
 # ---------- Container logs from task on Kubernetes ----------
 @pytest.mark.kubernetes
 def test_container_logs_multinode_kubernetes():
