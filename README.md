@@ -1,5 +1,17 @@
 <p align="center">
   <picture>
+    <img alt="Trainy Logo" src="https://raw.githubusercontent.com/Trainy-ai/konduktor/main/docs/source/images/konduktor-logo-white-no-background.png" width="353" height="64" style="max-width: 100%;">
+  </picture>
+  <br/>
+  <br/>
+</p>
+
+This repository is a fork of the [original Skypilot](https://github.com/skypilot-org/skypilot) and maintained by [Trainy](https://trainy.ai/) in order to support running jobs Trainy's our managed Kubernetes cluster platform as a service, Konduktor ([Github](https://github.com/Trainy-ai/konduktor) and [Documentation](https://konduktor.readthedocs.io/en/latest/)). You can see some our contributions to the mainline project [here](https://github.com/skypilot-org/skypilot/pulls?q=is%3Apr+author%3Aasaiacai+). If there are features in this fork you feel like make sense to contribute back to upstream, please let us know and we are happy to make a pull request. We are planning on keeping this fork the same license as the original project (Apache 2.0), as we have also greatly benefit from the open nature of the project and believe that sharing our work reduces redundant work streams for maintainers, contributors and users alike.
+
+----
+
+<p align="center">
+  <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/skypilot-org/skypilot/master/docs/source/images/skypilot-wide-dark-1k.png">
     <img alt="SkyPilot" src="https://raw.githubusercontent.com/skypilot-org/skypilot/master/docs/source/images/skypilot-wide-light-1k.png" width=55%>
   </picture>
