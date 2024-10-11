@@ -518,32 +518,32 @@ def _create_pods(region: str, cluster_name_on_cloud: str,
                 continue
             pod_spec['metadata']['name'] = pod_name
             pod_spec['metadata']['labels']['component'] = pod_name
-            # For multi-node support, we put a soft-constraint to schedule
-            # worker pods on different nodes than the head pod.
-            # This is not set as a hard constraint because if different nodes
-            # are not available, we still want to be able to schedule worker
-            # pods on larger nodes which may be able to fit multiple SkyPilot
-            # "nodes".
-            pod_spec['spec']['affinity'] = {
-                'podAntiAffinity': {
-                    # Set as a soft constraint
-                    'preferredDuringSchedulingIgnoredDuringExecution': [{
-                        # Max weight to avoid scheduling on the
-                        # same physical node unless necessary.
-                        'weight': 100,
-                        'podAffinityTerm': {
-                            'labelSelector': {
-                                'matchExpressions': [{
-                                    'key': TAG_SKYPILOT_CLUSTER_NAME,
-                                    'operator': 'In',
-                                    'values': [cluster_name_on_cloud]
-                                }]
-                            },
-                            'topologyKey': 'kubernetes.io/hostname'
-                        }
-                    }]
-                }
+        # For multi-node support, we put a soft-constraint to schedule
+        # worker pods on different nodes than the head pod.
+        # This is not set as a hard constraint because if different nodes
+        # are not available, we still want to be able to schedule worker
+        # pods on larger nodes which may be able to fit multiple SkyPilot
+        # "nodes".
+        pod_spec['spec']['affinity'] = {
+            'podAntiAffinity': {
+                # Set as a soft constraint
+                'preferredDuringSchedulingIgnoredDuringExecution': [{
+                    # Max weight to avoid scheduling on the
+                    # same physical node unless necessary.
+                    'weight': 100,
+                    'podAffinityTerm': {
+                        'labelSelector': {
+                            'matchExpressions': [{
+                                'key': TAG_SKYPILOT_CLUSTER_NAME,
+                                'operator': 'In',
+                                'values': [cluster_name_on_cloud]
+                            }]
+                        },
+                        'topologyKey': 'kubernetes.io/hostname'
+                    }
+                }]
             }
+        }
         pod = kubernetes.core_api(context).create_namespaced_pod(
             namespace, pod_spec)
         created_pods[pod.metadata.name] = pod
@@ -659,6 +659,7 @@ def _terminate_node(namespace: str, context: Optional[str],
         logger.warning('terminate_instances: Error occurred when analyzing '
                        f'SSH Jump pod: {e}')
     try:
+
         kubernetes.core_api(context).delete_namespaced_service(
             pod_name, namespace, _request_timeout=config_lib.DELETION_TIMEOUT)
         kubernetes.core_api(context).delete_namespaced_service(
