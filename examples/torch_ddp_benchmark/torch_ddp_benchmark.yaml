@@ -28,9 +28,12 @@ name: torch-ddp-bench
 num_nodes: 2
 
 resources:
-  accelerators: A100:8 # Make sure you use 8 GPU instances
-  use_spot: True
-  cloud: gcp
+  accelerators: H100-MEGA-80GB:8 # Make sure you use 8 GPU instances
+  cloud: kubernetes
+  labels:
+    kueue.x-k8s.io/queue-name: user-queue # this is assigned by your admin
+    kueue.x-k8s.io/priority-class: low-priority
+    max-run-duration-seconds: "3000"
 
 file_mounts: 
   ./torch_ddp_benchmark.py: ./examples/torch_ddp_benchmark/torch_ddp_benchmark.py
