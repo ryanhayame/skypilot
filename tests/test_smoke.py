@@ -3603,7 +3603,7 @@ def test_long_setup_run_script(generic_cloud: str):
             setup: |
               echo "start long setup"
             """))
-        for i in range(1024 * 120):
+        for i in range(1024 * 200):
             f.write(f'  echo {i}\n')
         f.write('  echo "end long setup"\n')
         f.write(
@@ -3611,7 +3611,7 @@ def test_long_setup_run_script(generic_cloud: str):
             run: |
               echo "run"
         """))
-        for i in range(1024 * 120):
+        for i in range(1024 * 200):
             f.write(f'  echo {i}\n')
         f.write('  echo "end run"\n')
         f.flush()
@@ -5590,7 +5590,7 @@ def test_multiple_accelerators_unordered():
 def test_multiple_accelerators_unordered_with_default():
     name = _get_cluster_name()
     test = Test(
-        'multiple-accelerators-unordered',
+        'multiple-accelerators-unordered-with-default',
         [
             f'sky launch -y -c {name} tests/test_yamls/test_multiple_accelerators_unordered_with_default.yaml',
             f'sky logs {name} 1 --status',  # Ensure the job succeeded.
