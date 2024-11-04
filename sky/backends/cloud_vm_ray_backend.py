@@ -2114,8 +2114,11 @@ class CloudVmRayResourceHandle(backends.backend.ResourceHandle):
         self._version = self._VERSION
         self.cluster_name = cluster_name
         self.cluster_name_on_cloud = cluster_name_on_cloud
-        self._cluster_yaml = cluster_yaml.replace(os.path.expanduser('~'), '~',
-                                                  1)
+        # Replace the home directory with ~ for better robustness across systems
+        # with different home directories.
+        if cluster_yaml.startswith(os.path.expanduser('~')):
+            cluster_yaml = cluster_yaml.replace(os.path.expanduser('~'), '~', 1)
+        self._cluster_yaml = cluster_yaml
         # List of (internal_ip, feasible_ip) tuples for all the nodes in the
         # cluster, sorted by the feasible ips. The feasible ips can be either
         # internal or external ips, depending on the use_internal_ips flag.
@@ -2472,7 +2475,7 @@ class CloudVmRayResourceHandle(backends.backend.ResourceHandle):
         """Returns number of IPs per node in the cluster, handling TPU Pod."""
         is_tpu_vm_pod = gcp_utils.is_tpu_vm_pod(self.launched_resources)
         if is_tpu_vm_pod:
-            num_ips = gcp_utils.get_num_tpu_devices(self.launched_resources)
+            num_ips = len(self.internal_ips())
         else:
             num_ips = 1
         return num_ips
@@ -2710,7 +2713,7 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
                 (e.g., cluster name invalid) or a region/zone throwing
                 resource unavailability.
             exceptions.CommandError: any ssh command error.
-            RuntimeErorr: raised when 'rsync' is not installed.
+            RuntimeError: raised when 'rsync' is not installed.
             # TODO(zhwu): complete the list of exceptions.
         """
         # FIXME: ray up for Azure with different cluster_names will overwrite
