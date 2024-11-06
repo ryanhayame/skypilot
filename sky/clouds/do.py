@@ -2,7 +2,7 @@
 
 import json
 import typing
-from typing import Dict, Iterator, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 from sky import clouds
 from sky.adaptors import do
@@ -158,7 +158,7 @@ class DO(clouds.Cloud):
 
     @classmethod
     def get_accelerators_from_instance_type(
-            cls, instance_type: str) -> Optional[Dict[str, int]]:
+            cls, instance_type: str) -> Optional[Dict[str, Union[int, float]]]:
         return service_catalog.get_accelerators_from_instance_type(
             instance_type, clouds='DO')
 
