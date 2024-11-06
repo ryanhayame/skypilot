@@ -336,7 +336,11 @@ class DockerInitializer:
 
     def _check_docker_installed(self):
         no_exist = 'NoExist'
+        # SkyPilot: Add the current user to the docker group first (if needed),
+        # before checking if docker is installed to avoid permission issues.
         cleaned_output = self._run(
+            'id -nG $USER | grep -qw docker || '
+            'sudo usermod -aG docker $USER > /dev/null 2>&1;'
             f'command -v {self.docker_cmd} || echo {no_exist!r}')
         if no_exist in cleaned_output or 'docker' not in cleaned_output:
             logger.error(
