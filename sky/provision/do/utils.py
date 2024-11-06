@@ -181,7 +181,7 @@ def create_instance(region: str, cluster_name_on_cloud: str, instance_type: str,
     tags = [f'{key}:{value}' for key, value in tags.items()]
     default_image = constants.GPU_IMAGES.get(
         config.node_config['InstanceType'],
-        'ubuntu-22-04-x64',
+        'gpu-h100x1-base',
     )
     image_id = config.node_config['ImageId']
     image_id = image_id if image_id is not None else default_image
@@ -197,7 +197,6 @@ def create_instance(region: str, cluster_name_on_cloud: str, instance_type: str,
                 config.authentication_config['ssh_public_key'])['fingerprint']
         ],
         'tags': tags,
-        'user_data': constants.INSTALL_DOCKER,
     }
     instance = _create_droplet(instance_request)
 
