@@ -142,9 +142,6 @@ class DO(clouds.Cloud):
         # https://docs.digitalocean.com/platform/billing/bandwidth/
         return 0.0
 
-    def __repr__(self):
-        return self._REPR
-
     @classmethod
     def get_default_instance_type(
         cls,
