@@ -188,14 +188,14 @@ class DO(clouds.Cloud):
             else:
                 assert region.name in resources.image_id
                 image_id = resources.image_id[region.name]
-        return {
+        resources_vars = {
             'instance_type': resources.instance_type,
             'custom_resources': custom_resources,
             'region': region.name,
-            **({
-                'image_id': image_id
-            } if image_id else {})
         }
+        if image_id is not None:
+            resources_vars['image_id'] = image_id
+        return resources_vars
 
     def _get_feasible_launchable_resources(
         self, resources: 'resources_lib.Resources'
