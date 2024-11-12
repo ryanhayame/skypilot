@@ -265,7 +265,7 @@ class DO(clouds.Cloud):
         return True, None
 
     def get_credential_file_mounts(self) -> Dict[str, str]:
-        do_utils.client()
+        do_utils.client() # to initialize `do_utils.CREDENTIALS_PATH`
         return {
             f'~/.config/doctl/{_CREDENTIAL_FILE}': do_utils.CREDENTIALS_PATH
         }
