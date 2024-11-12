@@ -202,7 +202,7 @@ class DO(clouds.Cloud):
     ) -> resources_utils.FeasibleResources:
         """Returns a list of feasible resources for the given resources."""
         if resources.use_spot:
-            # TODO: Add hints to all return values in this method to help
+            # TODO(asaiacai): Add hints to all return values in this method to help
             #  users understand why the resources are not launchable.
             return resources_utils.FeasibleResources([], [], None)
         if resources.instance_type is not None:
