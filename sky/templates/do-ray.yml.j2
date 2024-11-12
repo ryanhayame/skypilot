@@ -57,10 +57,6 @@ file_mounts: {
 {%- endfor %}
 }
 
-rsync_exclude: []
-
-initialization_commands: []
-
 # List of shell commands to run to set up nodes.
 # NOTE: these are very performance-sensitive. Each new item opens/closes an SSH
 # connection, which is expensive. Try your best to co-locate commands into fewer
