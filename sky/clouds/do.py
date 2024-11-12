@@ -138,6 +138,8 @@ class DO(clouds.Cloud):
         return 0.0
 
     def get_egress_cost(self, num_gigabytes: float) -> float:
+        # first 500GB free per month, $0.01/GB excess
+        # https://docs.digitalocean.com/platform/billing/bandwidth/
         return 0.0
 
     def __repr__(self):
