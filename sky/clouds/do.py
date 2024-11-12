@@ -281,14 +281,14 @@ class DO(clouds.Cloud):
         del region
         try:
             response = do_utils.client().images.get(image_id=image_id)
+            if not response:
+                raise do_utils.DigitalOceanError(
+                    f'No image_id `{image_id}` found') from err
             return response['image']['size_gigabytes']
         except do.exceptions().HttpResponseError as err:
             raise do_utils.DigitalOceanError(
                 'HTTP error while retrieving size of '
                 f'image_id {response}: {err.error.message}') from err
-        except KeyError as err:
-            raise do_utils.DigitalOceanError(
-                f'No image_id `{image_id}` found') from err
 
     def instance_type_exists(self, instance_type: str) -> bool:
         return service_catalog.instance_type_exists(instance_type, 'DO')
