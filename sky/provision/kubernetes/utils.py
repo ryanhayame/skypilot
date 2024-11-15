@@ -376,7 +376,7 @@ class KarpenterLabelFormatter(SkyPilotLabelFormatter):
 # auto-detecting the GPU label type.
 LABEL_FORMATTER_REGISTRY = [
     SkyPilotLabelFormatter, GKELabelFormatter, KarpenterLabelFormatter,
-    GFDLabelFormatter, CoreWeaveLabelFormatter
+    GFDLabelFormatter, CoreWeaveLabelFormatter, NebiusLabelFormatter
 ]
 
 # Mapping of autoscaler type to label formatter
