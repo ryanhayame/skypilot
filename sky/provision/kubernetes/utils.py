@@ -369,6 +369,35 @@ class KarpenterLabelFormatter(SkyPilotLabelFormatter):
     """
     LABEL_KEY = 'karpenter.k8s.aws/instance-gpu-name'
 
+class NebiusLabelFormatter(GPULabelFormatter):
+    """Nebius label formatter
+    Nebius uses the label `node.kubernetes.io/instance-type` as the key, 
+    and a lowercase accelerator str as the value.
+
+    ex. "node.kubernetes.io/instance-type=gpu-h100-sxm"
+    Nebius docs: https://docs.nebius.com/compute/virtual-machines/types/
+    """
+    LABEL_KEY = 'node.kubernetes.io/instance-type'
+
+    @classmethod
+    def get_label_key(cls, accelerator: Optional[str] = None) -> str:
+        return cls.LABEL_KEY
+
+    @classmethod
+    def get_label_keys(cls) -> List[str]:
+        return [cls.LABEL_KEY]
+
+    @classmethod
+    def get_label_value(cls, accelerator: str) -> str:
+        return accelerator.lower()
+
+    @classmethod
+    def match_label_key(cls, label_key: str) -> bool:
+        return label_key == cls.LABEL_KEY
+
+    @classmethod
+    def get_accelerator_from_label_value(cls, value: str) -> str:
+        return value.upper()
 
 # LABEL_FORMATTER_REGISTRY stores the label formats SkyPilot will try to
 # discover the accelerator type from. The order of the list is important, as
@@ -376,7 +405,7 @@ class KarpenterLabelFormatter(SkyPilotLabelFormatter):
 # auto-detecting the GPU label type.
 LABEL_FORMATTER_REGISTRY = [
     SkyPilotLabelFormatter, GKELabelFormatter, KarpenterLabelFormatter,
-    GFDLabelFormatter, CoreWeaveLabelFormatter
+    GFDLabelFormatter, CoreWeaveLabelFormatter, NebiusLabelFormatter
 ]
 
 # Mapping of autoscaler type to label formatter
