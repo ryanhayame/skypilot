@@ -389,7 +389,7 @@ class NebiusLabelFormatter(GPULabelFormatter):
 
     @classmethod
     def get_label_value(cls, accelerator: str) -> str:
-        return accelerator.lower()
+        return "gpu-h100-sxm"
 
     @classmethod
     def match_label_key(cls, label_key: str) -> bool:
@@ -397,7 +397,7 @@ class NebiusLabelFormatter(GPULabelFormatter):
 
     @classmethod
     def get_accelerator_from_label_value(cls, value: str) -> str:
-        return value.upper()
+        return "H100"
 
 # LABEL_FORMATTER_REGISTRY stores the label formats SkyPilot will try to
 # discover the accelerator type from. The order of the list is important, as
