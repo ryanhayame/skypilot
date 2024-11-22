@@ -748,12 +748,12 @@ def _create_pods(region: str, cluster_name_on_cloud: str,
             pod_spec_copy['metadata']['labels'].update(head_selector)
             pod_spec_copy['metadata']['name'] = f'{cluster_name_on_cloud}-head'
         else:
-            # Worker pods
-            pod_spec_copy['metadata']['labels'].update(
-                constants.WORKER_NODE_TAGS)
-            pod_uuid = str(uuid.uuid4())[:6]
-            pod_name = f'{cluster_name_on_cloud}-{pod_uuid}'
-            pod_spec_copy['metadata']['name'] = f'{pod_name}-worker'
+            pod_spec['metadata']['labels'].update(constants.WORKER_NODE_TAGS)
+            pod_name = f'{cluster_name_on_cloud}-worker{pod_id}'
+            if pod_id == 0 or pod_name in running_pods:
+                continue
+            pod_spec['metadata']['name'] = pod_name
+            pod_spec['metadata']['labels']['component'] = pod_name
             # For multi-node support, we put a soft-constraint to schedule
             # worker pods on different nodes than the head pod.
             # This is not set as a hard constraint because if different nodes
