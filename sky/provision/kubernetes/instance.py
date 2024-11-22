@@ -747,19 +747,17 @@ def _create_pods(region: str, cluster_name_on_cloud: str,
             pod_spec_copy['metadata']['labels'].update(head_selector)
             pod_spec_copy['metadata']['name'] = f'{cluster_name_on_cloud}-head'
         else:
-            pod_spec['metadata']['labels'].update(constants.WORKER_NODE_TAGS)
-            pod_name = f'{cluster_name_on_cloud}-worker{pod_id}'
-            if pod_id == 0 or pod_name in running_pods:
-                continue
-            pod_spec['metadata']['name'] = pod_name
-            pod_spec['metadata']['labels']['component'] = pod_name
+            pod_spec_copy['metadata']['labels'].update(constants.WORKER_NODE_TAGS)
+            pod_name = f'{cluster_name_on_cloud}-worker{i}'
+            pod_spec_copy['metadata']['name'] = pod_name
+            pod_spec_copy['metadata']['labels']['component'] = pod_name
         # For multi-node support, we put a soft-constraint to schedule
         # worker pods on different nodes than the head pod.
         # This is not set as a hard constraint because if different nodes
         # are not available, we still want to be able to schedule worker
         # pods on larger nodes which may be able to fit multiple SkyPilot
         # "nodes".
-        pod_spec['spec']['affinity'] = {
+        pod_spec_copy['spec']['affinity'] = {
             'podAntiAffinity': {
                 # Set as a soft constraint
                 'preferredDuringSchedulingIgnoredDuringExecution': [{
