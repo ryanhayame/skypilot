@@ -43,3 +43,4 @@ class KubernetesAutoscalerType(enum.Enum):
     GKE = 'gke'
     KARPENTER = 'karpenter'
     GENERIC = 'generic'
+    NEBIUS = 'nebius'

@@ -413,6 +413,7 @@ AUTOSCALER_TO_LABEL_FORMATTER = {
     kubernetes_enums.KubernetesAutoscalerType.GKE: GKELabelFormatter,
     kubernetes_enums.KubernetesAutoscalerType.KARPENTER: KarpenterLabelFormatter,  # pylint: disable=line-too-long
     kubernetes_enums.KubernetesAutoscalerType.GENERIC: SkyPilotLabelFormatter,
+    kubernetes_enums.KubernetesAutoscalerType.NEBIUS: NebiusLabelFormatter,
 }
 
 
