@@ -747,7 +747,8 @@ def _create_pods(region: str, cluster_name_on_cloud: str,
             pod_spec_copy['metadata']['labels'].update(head_selector)
             pod_spec_copy['metadata']['name'] = f'{cluster_name_on_cloud}-head'
         else:
-            pod_spec_copy['metadata']['labels'].update(constants.WORKER_NODE_TAGS)
+            pod_spec_copy['metadata']['labels'].update(
+                constants.WORKER_NODE_TAGS)
             pod_name = f'{cluster_name_on_cloud}-worker{i}'
             pod_spec_copy['metadata']['name'] = pod_name
             pod_spec_copy['metadata']['labels']['component'] = pod_name
